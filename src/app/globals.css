@@ -1,0 +1,129 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-main: #F8F9FA;
+    --bg-surface: #FFFFFF;
+    --bg-surface-hover: #F3F4F6;
+    --border-color: #E5E7EB;
+    --text-primary: #111827;
+    --text-secondary: #4B5563;
+    --text-muted: #9CA3AF;
+    --accent-primary: #2563EB;
+    --accent-hover: #1D4ED8;
+    --accent-ring: rgba(37, 99, 235, 0.2);
+  }
+
+  html.dark {
+    --bg-main: #0B0F17;
+    --bg-surface: #151C2C;
+    --bg-surface-hover: #1E293B;
+    --border-color: #2D3748;
+    --text-primary: #F9FAFB;
+    --text-secondary: #9CA3AF;
+    --text-muted: #6B7280;
+  }
+
+  /* Dynamic Accent Colors */
+  html[data-accent="blue"] {
+    --accent-primary: #2563EB;
+    --accent-hover: #1D4ED8;
+    --accent-ring: rgba(37, 99, 235, 0.2);
+  }
+  html[data-accent="amber"] {
+    --accent-primary: #D97706;
+    --accent-hover: #B45309;
+    --accent-ring: rgba(217, 119, 6, 0.2);
+  }
+  html[data-accent="pink"] {
+    --accent-primary: #DB2777;
+    --accent-hover: #BE185D;
+    --accent-ring: rgba(219, 39, 119, 0.2);
+  }
+  html[data-accent="rose"] {
+    --accent-primary: #E11D48;
+    --accent-hover: #BE123C;
+    --accent-ring: rgba(225, 29, 72, 0.2);
+  }
+  html[data-accent="emerald"] {
+    --accent-primary: #059669;
+    --accent-hover: #047857;
+    --accent-ring: rgba(5, 150, 105, 0.2);
+  }
+  html[data-accent="violet"] {
+    --accent-primary: #7C3AED;
+    --accent-hover: #6D28D9;
+    --accent-ring: rgba(124, 58, 237, 0.2);
+  }
+  html[data-accent="black"] {
+    --accent-primary: #18181B;
+    --accent-hover: #09090B;
+    --accent-ring: rgba(24, 24, 27, 0.2);
+  }
+  html.dark[data-accent="black"] {
+    --accent-primary: #F4F4F5;
+    --accent-hover: #E4E4E7;
+    --accent-ring: rgba(244, 244, 245, 0.2);
+  }
+
+  body {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+}
+
+/* Utility classes for variable colors */
+.bg-surface {
+  background-color: var(--bg-surface);
+}
+
+.bg-surface-hover:hover {
+  background-color: var(--bg-surface-hover);
+}
+
+.border-theme {
+  border-color: var(--border-color);
+}
+
+.text-main {
+  color: var(--text-primary);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.bg-accent {
+  background-color: var(--accent-primary);
+}
+
+.bg-accent-hover:hover {
+  background-color: var(--accent-hover);
+}
+
+.text-accent {
+  color: var(--accent-primary);
+}
+
+.border-accent {
+  border-color: var(--accent-primary);
+}
+
+/* Custom scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 9999px;
+}
