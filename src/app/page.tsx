@@ -1,69 +1,181 @@
-import Image from "next/image";
+'use client';
+
+import React, { useState, useMemo } from 'react';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { LoginPage } from '@/components/auth/LoginPage';
+import { KanbanBoard } from '@/components/task/KanbanBoard';
+import { ListView } from '@/components/task/ListView';
+import { TaskDetailModal } from '@/components/task/TaskDetailModal';
+import { AddTaskModal } from '@/components/task/AddTaskModal';
+import { ProjectsView } from '@/components/project/ProjectsView';
+import { SettingsView } from '@/components/settings/SettingsView';
+import { LoadingState } from '@/components/ui/LoadingState';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { Toast } from '@/components/ui/Toast';
+import { useAuth } from '@/hooks/useAuth';
+import { useTasks } from '@/hooks/useTasks';
+import { MOCK_PROJECTS } from '@/data/mockData';
+import { CreateTaskPayload, Task, TaskStatus, ViewMode } from '@/types';
 
 export default function Home() {
+  const { user, isAuthenticated, isAuthenticating, loginAsGuest, logout } = useAuth();
+  const [activeTab, setActiveTab] = useState<'tasks' | 'projects' | 'settings'>('tasks');
+  const [viewMode, setViewMode] = useState<ViewMode>('board');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const {
+    tasks,
+    isLoading,
+    error,
+    successMessage,
+    createTask,
+    updateTask,
+    clearNotifications,
+  } = useTasks();
+
+  const [projects] = useState(MOCK_PROJECTS);
+
+  // Modal states
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [isTaskDetailOpen, setIsTaskDetailOpen] = useState(false);
+  const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
+  const [newTaskInitialStatus, setNewTaskInitialStatus] = useState<TaskStatus>('todo');
+
+  const filteredTasks = useMemo(() => {
+    if (!searchQuery.trim()) return tasks;
+    const query = searchQuery.toLowerCase();
+    return tasks.filter(
+      (task) =>
+        task.title.toLowerCase().includes(query) ||
+        (task.description && task.description.toLowerCase().includes(query)) ||
+        task.labels.some((l) => l.toLowerCase().includes(query))
+    );
+  }, [tasks, searchQuery]);
+
+  const handleTaskClick = (task: Task) => {
+    setSelectedTask(task);
+    setIsTaskDetailOpen(true);
+  };
+
+  const handleOpenAddTask = (status: TaskStatus = 'todo') => {
+    setNewTaskInitialStatus(status);
+    setIsAddTaskOpen(true);
+  };
+
+  const handleAddNewTask = async (taskPayload: CreateTaskPayload) => {
+    await createTask(taskPayload);
+    setIsAddTaskOpen(false);
+  };
+
+  const handleUpdateTask = async (updatedTask: Task) => {
+    const payload = {
+      title: updatedTask.title,
+      description: updatedTask.description || undefined,
+      status: updatedTask.status,
+      priority: updatedTask.priority,
+      dueDate: updatedTask.dueDate || undefined,
+      labels: updatedTask.labels,
+    };
+    await updateTask(updatedTask.id, payload);
+    setSelectedTask(updatedTask);
+  };
+
+  // Render auth loading state
+  if (isAuthenticating) {
+    return <LoadingState message="Authenticating session..." type="spinner" />;
+  }
+
+  // Render Login screen if user is not authenticated
+  if (!isAuthenticated) {
+    return <LoginPage onGuestLogin={loginAsGuest} isLoading={isAuthenticating} />;
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
+    <AppLayout
+      activeTab={activeTab}
+      setActiveTab={setActiveTab}
+      searchQuery={searchQuery}
+      setSearchQuery={setSearchQuery}
+      viewMode={viewMode}
+      setViewMode={setViewMode}
+      onAddTask={() => handleOpenAddTask('todo')}
+      onLogout={logout}
+    >
+      <Toast
+        type={error ? 'error' : 'success'}
+        message={error || successMessage}
+        onClose={clearNotifications}
+      />
+
+      {isLoading ? (
+        <LoadingState message="Fetching workspace data..." type="skeleton" />
+      ) : (
+        <>
+          {activeTab === 'tasks' && (
+            <div className="h-full">
+              {filteredTasks.length === 0 ? (
+                <EmptyState
+                  title="No tasks found"
+                  description={
+                    searchQuery
+                      ? `No tasks matched "${searchQuery}".`
+                      : 'Create your first task to get started.'
+                  }
+                  actionLabel={searchQuery ? 'Clear Search' : 'Add Task'}
+                  onAction={() => {
+                    if (searchQuery) setSearchQuery('');
+                    else handleOpenAddTask('todo');
+                  }}
+                />
+              ) : viewMode === 'board' ? (
+                <KanbanBoard
+                  tasks={filteredTasks}
+                  onTaskClick={handleTaskClick}
+                  onAddTask={handleOpenAddTask}
+                />
+              ) : (
+                <ListView
+                  tasks={filteredTasks}
+                  onTaskClick={handleTaskClick}
+                  onAddTask={handleOpenAddTask}
+                />
+              )}
+            </div>
+          )}
+
+          {activeTab === 'projects' && (
+            <ProjectsView
+              projects={projects}
+              onSelectProject={() => setActiveTab('tasks')}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+          )}
+
+          {activeTab === 'settings' && <SettingsView />}
+        </>
+      )}
+
+      <TaskDetailModal
+        task={selectedTask}
+        isOpen={isTaskDetailOpen}
+        onClose={() => setIsTaskDetailOpen(false)}
+        onUpdateTask={handleUpdateTask}
+      />
+
+      <AddTaskModal
+        isOpen={isAddTaskOpen}
+        onClose={() => setIsAddTaskOpen(false)}
+        onAddTask={(task) => {
+          handleAddNewTask({
+            title: task.title,
+            description: task.description || undefined,
+            status: task.status,
+            priority: task.priority,
+            dueDate: task.dueDate || undefined,
+            labels: task.labels,
+          });
+        }}
+        initialStatus={newTaskInitialStatus}
+      />
+    </AppLayout>
   );
 }

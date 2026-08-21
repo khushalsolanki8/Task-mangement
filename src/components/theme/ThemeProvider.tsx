@@ -16,33 +16,37 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [themeMode, setThemeModeState] = useState<ThemeMode>('light');
   const [accentColor, setAccentColorState] = useState<AccentColor>('blue');
 
-  useEffect(() => {
-    // Load persisted preferences if available
-    const savedTheme = localStorage.getItem('theme_mode') as ThemeMode;
-    const savedAccent = localStorage.getItem('accent_color') as AccentColor;
-    if (savedTheme) setThemeModeState(savedTheme);
-    if (savedAccent) setAccentColorState(savedAccent);
-  }, []);
-
+  // Synchronize initial state with DOM attributes set by inline script
   useEffect(() => {
     const root = document.documentElement;
-    if (themeMode === 'dark') {
+    const isDark = root.classList.contains('dark');
+    const currentAccent = (root.getAttribute('data-accent') as AccentColor) || 'blue';
+
+    setThemeModeState(isDark ? 'dark' : 'light');
+    setAccentColorState(currentAccent);
+  }, []);
+
+  const setThemeMode = (mode: ThemeMode) => {
+    setThemeModeState(mode);
+    const root = document.documentElement;
+    if (mode === 'dark') {
       root.classList.add('dark');
     } else {
       root.classList.remove('dark');
     }
-    localStorage.setItem('theme_mode', themeMode);
-  }, [themeMode]);
+    try {
+      localStorage.setItem('theme_mode', mode);
+    } catch (e) {}
+  };
 
-  useEffect(() => {
+  const setAccentColor = (color: AccentColor) => {
+    setAccentColorState(color);
     const root = document.documentElement;
-    // Set accent color data attribute
-    root.setAttribute('data-accent', accentColor);
-    localStorage.setItem('accent_color', accentColor);
-  }, [accentColor]);
-
-  const setThemeMode = (mode: ThemeMode) => setThemeModeState(mode);
-  const setAccentColor = (color: AccentColor) => setAccentColorState(color);
+    root.setAttribute('data-accent', color);
+    try {
+      localStorage.setItem('accent_color', color);
+    } catch (e) {}
+  };
 
   return (
     <ThemeContext.Provider value={{ themeMode, accentColor, setThemeMode, setAccentColor }}>

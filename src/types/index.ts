@@ -1,19 +1,20 @@
-export type TaskPriority = 'no_priority' | 'urgent' | 'high' | 'medium' | 'low';
+export type TaskPriority = 'NO_PRIORITY' | 'URGENT' | 'HIGH' | 'MEDIUM' | 'LOW' | 'no_priority' | 'urgent' | 'high' | 'medium' | 'low';
 
-export type TaskStatus = 'todo' | 'doing' | 'completed' | 'on_hold' | 'user_feedback';
+export type TaskStatus = 'TODO' | 'DOING' | 'COMPLETED' | 'ON_HOLD' | 'USER_FEEDBACK' | 'todo' | 'doing' | 'completed' | 'on_hold' | 'user_feedback';
 
 export type ThemeMode = 'light' | 'dark';
 
-export type AccentColor = 'blue' | 'amber' | 'pink' | 'rose' | 'emerald' | 'violet' | 'black';
+export type AccentColor = 'amber' | 'blue' | 'pink' | 'rose' | 'emerald' | 'black';
 
 export type ViewMode = 'board' | 'list';
 
 export interface User {
   id: string;
   name: string;
-  email: string;
-  avatar?: string;
-  initials: string;
+  email?: string | null;
+  avatar?: string | null;
+  isGuest?: boolean;
+  initials?: string;
 }
 
 export interface Subtask {
@@ -35,23 +36,63 @@ export interface TaskComment {
 export interface Task {
   id: string;
   title: string;
-  description?: string;
+  description?: string | null;
   status: TaskStatus;
   priority: TaskPriority;
-  dueDate?: string;
+  dueDate?: string | null;
   members: User[];
   labels: string[];
   subtasks?: Subtask[];
   comments?: TaskComment[];
-  projectId?: string;
+  projectId?: string | null;
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface Project {
   id: string;
   name: string;
   priority: TaskPriority;
-  lead: User;
-  dueDate: string;
+  lead?: User | null;
+  dueDate?: string | null;
   taskCount: number;
+}
+
+// API DTO & Response Payload Interfaces
+export interface CreateTaskPayload {
+  title: string;
+  description?: string;
+  status?: TaskStatus;
+  priority?: TaskPriority;
+  dueDate?: string;
+  labels?: string[];
+  projectId?: string;
+}
+
+export interface UpdateTaskPayload {
+  title?: string;
+  description?: string;
+  status?: TaskStatus;
+  priority?: TaskPriority;
+  dueDate?: string;
+  labels?: string[];
+  projectId?: string;
+}
+
+export interface TaskFilterParams {
+  search?: string;
+  status?: TaskStatus;
+  priority?: TaskPriority;
+  projectId?: string;
+}
+
+export interface AuthResponse {
+  accessToken: string;
+  user: User;
+}
+
+export interface ApiErrorResponse {
+  message: string | string[];
+  error?: string;
+  statusCode: number;
 }

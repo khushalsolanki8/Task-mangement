@@ -24,16 +24,16 @@
     --text-muted: #6B7280;
   }
 
-  /* Dynamic Accent Colors */
-  html[data-accent="blue"] {
-    --accent-primary: #2563EB;
-    --accent-hover: #1D4ED8;
-    --accent-ring: rgba(37, 99, 235, 0.2);
-  }
+  /* Color Modes matching Figma */
   html[data-accent="amber"] {
     --accent-primary: #D97706;
     --accent-hover: #B45309;
     --accent-ring: rgba(217, 119, 6, 0.2);
+  }
+  html[data-accent="blue"] {
+    --accent-primary: #2563EB;
+    --accent-hover: #1D4ED8;
+    --accent-ring: rgba(37, 99, 235, 0.2);
   }
   html[data-accent="pink"] {
     --accent-primary: #DB2777;
@@ -50,11 +50,6 @@
     --accent-hover: #047857;
     --accent-ring: rgba(5, 150, 105, 0.2);
   }
-  html[data-accent="violet"] {
-    --accent-primary: #7C3AED;
-    --accent-hover: #6D28D9;
-    --accent-ring: rgba(124, 58, 237, 0.2);
-  }
   html[data-accent="black"] {
     --accent-primary: #18181B;
     --accent-hover: #09090B;
@@ -70,16 +65,19 @@
     background-color: var(--bg-main);
     color: var(--text-primary);
     font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
-    transition: background-color 0.2s ease, color 0.2s ease;
+    transition: background-color 0.15s ease, color 0.15s ease;
   }
 }
 
-/* Utility classes for variable colors */
+.bg-main {
+  background-color: var(--bg-main);
+}
+
 .bg-surface {
   background-color: var(--bg-surface);
 }
 
-.bg-surface-hover:hover {
+.bg-surface-hover {
   background-color: var(--bg-surface-hover);
 }
 
@@ -100,22 +98,22 @@
 }
 
 .bg-accent {
-  background-color: var(--accent-primary);
+  background-color: var(--accent-primary) !important;
 }
 
 .bg-accent-hover:hover {
-  background-color: var(--accent-hover);
+  background-color: var(--accent-hover) !important;
 }
 
 .text-accent {
-  color: var(--accent-primary);
+  color: var(--accent-primary) !important;
 }
 
 .border-accent {
-  border-color: var(--accent-primary);
+  border-color: var(--accent-primary) !important;
 }
 
-/* Custom scrollbar styling */
+/* Custom scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
